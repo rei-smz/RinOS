@@ -1,4 +1,4 @@
-TOOLPATH = ../tolenv/z_tools
+TOOLPATH = ../z_tools
 MAKE = $(TOOLPATH)/make -r
 NASK = $(TOOLPATH)/nask
 EDIMG = $(TOOLPATH)/edimg
