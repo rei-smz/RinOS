@@ -1,10 +1,9 @@
 use core::fmt;
-use core::fmt::Arguments;
+
 #[allow(dead_code)]
 
 use crate::asm;
 use crate::font;
-use crate::font::{FONT_HEIGHT, FONT_WIDTH};
 
 const MOUSE_CURSOR_WIDTH: usize = 16;
 const MOUSE_CURSOR_HEIGHT: usize = 16;
@@ -100,9 +99,9 @@ impl Screen {
 
     //使用上面enum的颜色来填充
     pub fn boxfill8(&mut self, c: Color, x0: usize, y0: usize, x1: usize, y1: usize) {
-        for y in y0..=y1 {
-            for x in x0..=x1 {
-                let ptr = unsafe { &mut *((self.vram as *mut u8).offset((y * self.xsize as usize + x) as isize)) };
+        for j in y0..=y1 {
+            for i in x0..=x1 {
+                let ptr = unsafe { &mut *((self.vram as *mut u8).offset((j * self.xsize as usize + i) as isize)) };
                 *ptr = c as u8;
             }
         }
@@ -188,7 +187,7 @@ pub struct LineWriter {
     pub x: usize, //当前列
     pub y: usize, //当前行
     pub color: Color,
-    screen: Screen
+    pub screen: Screen
 }
 
 impl LineWriter {

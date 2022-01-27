@@ -10,11 +10,8 @@ IMG = haribote.img
 default :
 	$(MAKE) img
 
-$(IPL) : ipl.nas Makefile
-	$(NASK) ipl.nas ipl.bin ipl.lst
-
-asmhead.bin : asmhead.nas Makefile
-	$(NASK) asmhead.nas asmhead.bin asmhead.lst
+%.bin : %.nas Makefile
+	$(NASK) $*.nas $*.bin $*.lst
 
 $(IMG) : ipl.bin haribote.sys Makefile
 	$(EDIMG) imgin:$(TOOLPATH)/fdimg0at.tek \
