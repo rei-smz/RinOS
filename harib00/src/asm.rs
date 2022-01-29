@@ -2,7 +2,7 @@ use core::arch::asm;
 
 pub fn io_hlt() {
     unsafe {
-        asm!("hlt");
+        asm!("HLT");
     }
 }
 
@@ -18,29 +18,55 @@ pub fn io_sti() {
     }
 }
 
+pub fn io_stihlt() {
+    unsafe {
+        asm!("STI", "HLT");
+    }
+}
+
 pub fn io_out8(port: u32, data: u8) {
     unsafe {
-        asm!("OUT dx, al",
+        asm!(
+            // "MOV EDX, [{0}]",
+            // "MOV AL, [{1}]",
+            "OUT dx, al",
             in("edx") port,
-            in("al") data);
+            in("al") data
+        );
     }
+}
+
+pub fn io_in8(port: u32) -> u8 {
+    let mut ret: u8;
+    unsafe {
+        asm!(
+            "MOV eax, 0",
+            "IN al, dx",
+            in("edx") port, lateout("al") ret
+        );
+    }
+    ret
 }
 
 pub fn io_load_eflags() -> u32 {
     let ret;
     unsafe {
-        asm!("PUSHFD");
-        asm!("POP eax",
-            lateout("eax") ret);
+        asm!(
+            "PUSHFD",
+            "POP eax",
+            lateout("eax") ret
+        );
     }
     ret
 }
 
 pub fn io_store_eflags(eflags: u32) {
     unsafe {
-        asm!("PUSH eax",
-            in("eax") eflags);
-        asm!("POPFD");
+        asm!(
+            "PUSH eax",
+            "POPFD",
+            in("eax") eflags
+        );
     }
 }
 
@@ -67,24 +93,39 @@ pub fn load_idtr(limit: u32, addr: u32) {
 #[macro_export]
 macro_rules! asm_handler {
     ($name: ident) => {{
-        pub extern "C" fn wrapper() {
-            let fun = $name as extern "C" fn();
+        pub extern "x86-interrupt" fn wrapper() {
             use core::arch::asm;
             unsafe {
-                asm!("PUSH es");
-                asm!("PUSH ds");
-                asm!("PUSHAD");
-                asm!("MOV eax, esp");
-                asm!("PUSH eax");
-                asm!("MOV ax, ss");
-                asm!("MOV ds, ax");
-                asm!("MOV es, ax");
-                asm!("CALL {}", in(reg) fun);
-                asm!("POP eax");
-                asm!("POPAD");
-                asm!("POP ds");
-                asm!("POP es");
-                asm!("IRETD");
+                asm!(
+                    "PUSH es",
+                    "PUSH ds",
+                    "PUSHAD",
+                    "MOV eax, esp",
+                    "PUSH eax",
+                    "MOV ax, ss",
+                    "MOV ds, ax",
+                    "MOV es, ax",
+                    "CALL {}",
+                    "POP eax",
+                    "POPAD",
+                    "POP ds",
+                    "POP es",
+                    "IRETD", in(reg) $name as extern "x86-interrupt" fn()
+                );
+                // asm!("PUSH ES
+                //       PUSH DS
+                //       PUSHAD
+                //       MOV EAX,ESP
+                //       PUSH EAX
+                //       MOV AX,SS
+                //       MOV DS,AX
+                //       MOV ES,AX" : : : : "intel", "volatile");
+                // asm!("CALL $0" : : "r"($name as extern "C" fn()) : : "intel");
+                // asm!("POP EAX
+                //     POPAD
+                //     POP DS
+                //     POP ES
+                //     IRETD" : : : : "intel", "volatile");
             }
         }
         wrapper

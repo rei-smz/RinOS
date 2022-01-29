@@ -3,6 +3,7 @@ MAKE = $(TOOLPATH)/make -r
 NASK = $(TOOLPATH)/nask
 EDIMG = $(TOOLPATH)/edimg
 QEMU = $(TOOLPATH)/qemu
+BOCHS = bochs -f bochsrc
 IPL = ipl.bin
 IMG = haribote.img
 
@@ -19,7 +20,7 @@ $(IMG) : ipl.bin haribote.sys Makefile
 	copy from:haribote.sys to:@: \
 	imgout:$(IMG)
 
-libharibote_os.a : ./src/lib.rs
+libharibote_os.a : ./src/
 	cargo xbuild
 	cp ./target/i686-haribote/debug/libharibote_os.a .
 
@@ -37,14 +38,17 @@ asm :
 
 run :
 	$(MAKE) img
+	cp $(IMG) a.img
+	$(BOCHS)
+
+qemu:
+	$(MAKE) img
 	cp $(IMG) $(QEMU)/fdimage0.bin
 	$(MAKE) -C $(QEMU)
 
 clean :
-	-del ipl.bin
-	-del ipl.lst
-	-del asmhead.bin
-	-del libharibote_os.a
+	rm *.a *.img *.bin
+	rm -rf target
 
 src_only :
 	$(TOOLPATH)/make clean

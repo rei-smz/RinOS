@@ -11,13 +11,15 @@ const AR_INTGATE32: u32 = 0x008e;
 const AR_DATA32_RW: u32 = 0x4092;
 const AR_CODE32_ER: u32 = 0x409a;
 
+#[derive(Debug, Clone, Copy)]
+#[repr(C, packed)]
 struct SegmentDescriptor {
-    limit_low: u16,
-    base_low: u16,
-    base_mid: u8,
-    access_right: u8,
-    limit_high: u8,
-    base_high: u8
+    pub limit_low: u16,
+    pub base_low: u16,
+    pub base_mid: u8,
+    pub access_right: u8,
+    pub limit_high: u8,
+    pub base_high: u8
 }
 
 impl SegmentDescriptor {
@@ -37,6 +39,8 @@ impl SegmentDescriptor {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[repr(C, packed)]
 struct GateDescriptor {
     offset_low: u16,
     selector: u16,
